@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-vue": "^5.1.0",
+    "@jalzae/ckeditor5build": "^1.0.5",
     "@pinia/nuxt": "^0.4.11",
     "base64url": "^3.0.1",
     "buffer": "^6.0.3",

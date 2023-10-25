@@ -12,7 +12,6 @@ import Forms from "./Form.vue";
 import * as store from "@/store/";
 //api
 import api from "@/api/index";
-import image from "@/api/API/images";
 //model
 import Res from "@/model/response";
 //define
@@ -61,27 +60,7 @@ export default defineComponent({
 
       alert("Copied");
     },
-    async upload() {
-      try {
-        this.loading.set();
-        const res: typeof Res = await this.sendRequest(
-          image.imagescreate(this.forms),
-          true,
-          false,
-          true
-        );
-        if (res.status) {
-          this.url = this.$axios.defaults.baseURL + res.data;
-          this.copy();
-        } else {
-          throw "Gagal Upload";
-        }
-      } catch (e) {
-        Swal.fire({ title: "Gagal Upload", icon: "error" });
-      } finally {
-        this.loading.unset();
-      }
-    },
+   
   },
   mounted() {},
   computed: {},
