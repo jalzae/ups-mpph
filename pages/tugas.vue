@@ -21,6 +21,15 @@
 
     <Tables :format="format" :datas="datas" @action="action" />
     <Loading />
+    <div style="display: none">
+      <input
+        type="file"
+        class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2"
+        id="urlId"
+        @change="previewFiles(['pdf', 'docx', 'doc'], $event)"
+        ref="uploadFile"
+      />
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -36,8 +45,10 @@ import * as store from "@/store/";
 export default defineComponent({
   setup() {
     const loading = store.useLoading();
+    const modal = store.useModal();
     return {
       loading,
+      modal,
     };
   },
   mixins: [api],
@@ -46,7 +57,23 @@ export default defineComponent({
   methods: {
     async action(val: Action) {
       if (this.is_admin && val.action == "change_status") {
-        this.checkTugas(val.val1);
+        //
+      } else if (val.action == "upload_tugas") {
+        this.id_mhs = val.val1;
+        const inputElement = this.$refs.uploadFile;
+        inputElement.click();
+      } else if (val.action == "download") {
+        this.downloadTugas(val.val1);
+      }
+    },
+    downloadTugas(id: string) {
+      try {
+        const mhs = this.datas.find((e: any) => e.id == id);
+        if (mhs.MahasiswaTugas.length == 0) throw "not found detail tugas";
+        window.open(`${this.$axios.defaults.baseURL}${mhs.MahasiswaTugas.url}`);
+      } catch (e) {
+        alert(e);
+      } finally {
       }
     },
     async getTugas() {
@@ -74,6 +101,22 @@ export default defineComponent({
         }
         if (access == "4226") {
           this.is_admin = true;
+          this.format.btn2 = [
+            {
+              model: "status",
+              false: "false",
+              title: "Enable",
+              icon: "fas fa-download text-white",
+              class: "rounded-sm text-white p-2 shadow-md bg-green-500",
+              action: "download",
+              titlefalse: "",
+              iconfalse: "fas fa-close text-white",
+              classfalse: "rounded-sm text-white p-2 shadow-md bg-red-500",
+              actionfalse: "",
+              key: "id",
+              key2: "id",
+            },
+          ];
         }
       } catch (e) {
         alert(e);
@@ -89,31 +132,51 @@ export default defineComponent({
         const route = useRoute();
         const { id } = route.query;
 
-        if (this.is_admin) {
-          await this.sendRequest(
-            home.homechecktugas({
-              id_tugas: id,
-              id_mahasiswa: id_mhs,
-            })
-          );
-          await this.getTugas();
-        } else {
-          throw "You dont have access, dont cheating!";
-        }
+        const res = await this.sendRequest(
+          home.homechecktugas({
+            id_tugas: id,
+            id_mahasiswa: id_mhs,
+            url: this.form_upload.url,
+            ext: this.form_upload.ext,
+          }),
+          true,
+          false,
+          true
+        );
+        if (!res.status) throw res.message;
+        await this.getTugas();
       } catch (e) {
         alert(e);
       } finally {
         this.loading.unset();
       }
     },
+    previewFiles(extArr: string[] = ["pdf", "doc", "docx"], event: any) {
+      const file = event.target.files[0];
+      const ext = file.name.split(".").pop().toLowerCase();
+      if (!extArr.find((e) => e == ext)) {
+        alert("Wrong extension!!");
+        event.target.value = "";
+        return;
+      }
+      this.form_upload.url = file;
+      this.form_upload.ext = ext;
+
+      this.checkTugas(this.id_mhs);
+    },
   },
   data() {
     return {
+      id_mhs: null,
       is_admin: false,
       selected: {
         name: "",
         desc: "",
         dateline: "",
+      },
+      form_upload: {
+        url: "",
+        ext: "",
       },
       datas: [],
       format: {
@@ -126,11 +189,11 @@ export default defineComponent({
             title: "Enable",
             icon: "fas fa-check text-white",
             class: "rounded-sm text-white p-2 shadow-md bg-green-500",
-            action: "change_status",
+            action: "",
             titlefalse: "",
-            iconfalse: "fas fa-close text-white",
+            iconfalse: "fas fa-upload text-white",
             classfalse: "rounded-sm text-white p-2 shadow-md bg-red-500",
-            actionfalse: "change_status",
+            actionfalse: "upload_tugas",
             key: "id",
             key2: "id",
           },

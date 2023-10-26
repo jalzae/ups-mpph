@@ -190,7 +190,7 @@ export default defineComponent({
           model: "desc",
         },
         {
-          type: "date",
+          type: "datetime",
           label: "Dateline",
           model: "dateline",
         },
