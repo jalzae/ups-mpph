@@ -101,8 +101,8 @@ export default defineComponent({
       } catch (error) {
         alert(error);
       } finally {
-        this.form.name=''
-        this.form.desc=''
+        this.form.name = "";
+        this.form.desc = "";
         this.loading.unset();
       }
     },
@@ -112,6 +112,9 @@ export default defineComponent({
         const res = await this.sendRequest(tugas.tugasreadall());
         if (!res.status) {
           throw res.message;
+        }
+        for (let x of res.data.data) {
+          x["status"] = x["status"] ? "Tertutup" : "Terbuka";
         }
         this.datas = res.data.data;
       } catch (error) {
@@ -203,8 +206,8 @@ export default defineComponent({
         },
       ],
       format: {
-        header: ["Nama Tugas", "Dateline", "Action"],
-        body: ["name", "dateline"],
+        header: ["Nama Tugas", "Dateline", "Status", "Action"],
+        body: ["name", "dateline", "status"],
         action: [
           {
             action: "view",
