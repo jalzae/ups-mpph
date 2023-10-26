@@ -76,13 +76,13 @@ export default defineComponent({
         this.delTugas(val.val1);
       }
     },
-    async delTugas(id: string) {
+    async delTugas(idmhs: string) {
       try {
         this.loading.set();
         const route = useRoute();
         const { id } = route.query;
         const res = await this.sendRequest(
-          home.homedeletetugas({ id_tugas: id, id_mahasiswa: id })
+          home.homedeletetugas({ id_tugas: id, id_mahasiswa: idmhs })
         );
 
         if (!res.status) console.log(res.message);
