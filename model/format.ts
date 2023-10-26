@@ -9,5 +9,6 @@ export interface FormatAction {
 export interface Format {
   header: string[];
   body: string[];
+  btn2?: any[];
   action: FormatAction[];
 }
