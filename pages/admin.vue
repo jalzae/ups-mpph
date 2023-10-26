@@ -16,7 +16,7 @@
           :action="'addtugas'"
           @addtugas="addtugas"
         />
-        <Tables :format="format" :datas="datas" />
+        <Tables :format="format" :datas="datas" @action="action" />
       </div>
       <div class="mt-8">
         <h2>Mahasiswa</h2>
@@ -26,7 +26,11 @@
           :action="'addmahasiswa'"
           @addmahasiswa="addmahasiswa"
         />
-        <Tables :format="format_mahasiswa" :datas="datas_mahasiswa" />
+        <Tables
+          :format="format_mahasiswa"
+          :datas="datas_mahasiswa"
+          @action="action"
+        />
       </div>
     </div>
     <div v-else>
@@ -40,7 +44,6 @@
   </div>
 </template>
 <script lang="ts">
-//TODO password instance
 import Vue, { defineComponent } from "vue";
 import Forms from "@/components/Global/Form.vue";
 import Tables from "@/components/Global/Tables.vue";
@@ -48,6 +51,10 @@ import { Format } from "~~/model/format";
 import Action from "~~/model/action";
 //store
 import * as store from "@/store/";
+//api
+import api from "@/api/index";
+import mhs from "@/api/mahasiswa";
+import tugas from "@/api/tugas";
 export default defineComponent({
   name: "",
   setup() {
@@ -56,20 +63,27 @@ export default defineComponent({
       loading,
     };
   },
-  mixins: [],
+  mixins: [api],
   components: { Tables, Forms },
   props: {},
   methods: {
     action(val: Action) {
       if (val.action == "view") {
+        this.goto(val.val1);
       } else if (val.action == "delete") {
+        this.delmhs(val.val1);
       } else if (val.action == "close") {
+        this.deltugas(val.val1);
       }
+    },
+    goto(url: string) {
+      window.location.href = "/tugas?id=" + url + "&access=4226";
     },
     async addmahasiswa() {
       try {
         this.loading.set();
-        this.datas_mahasiswa.push(this.form_mahasiswa);
+        await this.sendRequest(mhs.mahasiswacreate(this.form_mahasiswa));
+        this.fetchmahasiswa();
       } catch (error) {
         alert(error);
       } finally {
@@ -79,15 +93,73 @@ export default defineComponent({
     async addtugas() {
       try {
         this.loading.set();
+        await this.sendRequest(tugas.tugascreate(this.form));
+        this.fetchtugas();
       } catch (error) {
         alert(error);
       } finally {
         this.loading.unset();
       }
     },
-    checkpin() {
-      if (this.pin.pin == "028332") {
+    async fetchtugas() {
+      try {
+        this.loading.set();
+        const res = await this.sendRequest(tugas.tugasreadall());
+        if (!res.status) {
+          throw res.message;
+        }
+        this.datas = res.data.data;
+      } catch (error) {
+        alert(error);
+        this.datas = [];
+      } finally {
+        this.loading.unset();
+      }
+    },
+    async fetchmahasiswa() {
+      try {
+        this.loading.set();
+        const res = await this.sendRequest(mhs.mahasiswareadall());
+        if (!res.status) {
+          throw res.message;
+        }
+        console.log(res.data);
+        this.datas_mahasiswa = res.data.data;
+      } catch (error) {
+        alert(error);
+        this.datas_mahasiswa = [];
+      } finally {
+        this.loading.unset();
+      }
+    },
+    async deltugas(id: string) {
+      try {
+        this.loading.set();
+        await this.sendRequest(tugas.tugasdelete(id));
+        this.fetchtugas();
+      } catch (error) {
+        alert(error);
+      } finally {
+        this.loading.unset();
+      }
+    },
+    async delmhs(id: string) {
+      try {
+        this.loading.set();
+        await this.sendRequest(mhs.mahasiswadelete(id));
+        this.fetchmahasiswa();
+      } catch (error) {
+        alert(error);
+      } finally {
+        this.loading.unset();
+      }
+    },
+    async checkpin() {
+      if (this.pin.pin == "4226") {
         this.is_admin = true;
+
+        await this.fetchtugas();
+        await this.fetchmahasiswa();
       } else {
         alert("Ga usah coba2 masuk ya gembel");
       }
@@ -184,7 +256,7 @@ export default defineComponent({
   mounted() {},
   computed: {},
   watch: {},
-  created() {},
+  async created() {},
 });
 </script>
 
