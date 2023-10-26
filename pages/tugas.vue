@@ -128,6 +128,7 @@ export default defineComponent({
         }
         if (access == "4226") {
           this.is_admin = true;
+          this.format.header.push('Action')
           this.format.btn2 = [
             {
               model: "status",
