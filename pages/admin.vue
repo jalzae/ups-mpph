@@ -188,7 +188,7 @@ export default defineComponent({
           model: "name",
         },
         {
-          type: "text",
+          type: "editor",
           label: "Desc",
           model: "desc",
         },

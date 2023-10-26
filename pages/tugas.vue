@@ -15,11 +15,19 @@
         DateLine :<strong> {{ selected.dateline }} </strong>
       </p>
     </h2>
-    <div class="card my-8">
-      <p>{{ selected.desc }}</p>
+    <div class="card my-8" v-html="selected.desc"></div>
+    <div class="mb-4">
+      <input
+        type="text"
+        class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2"
+        v-model="keyword"
+      />
     </div>
-
-    <Tables :format="format" :datas="datas" @action="action" />
+    <Tables
+      :format="format"
+      :datas="keyword == '' ? datas : filtered"
+      @action="action"
+    />
     <Loading />
     <div style="display: none">
       <input
@@ -167,6 +175,7 @@ export default defineComponent({
   },
   data() {
     return {
+      keyword: "",
       id_mhs: null,
       is_admin: false,
       selected: {
@@ -206,7 +215,13 @@ export default defineComponent({
   async created() {
     await this.getTugas();
   },
-  computed: {},
+  computed: {
+    filtered() {
+      return this.datas.filter((e: any) =>
+        e.name.toLowerCase().includes(this.keyword.toLowerCase())
+      );
+    },
+  },
   watch: {},
 });
 </script>
