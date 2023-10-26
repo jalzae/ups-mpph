@@ -89,6 +89,7 @@ export default defineComponent({
       } catch (error) {
         alert(error);
       } finally {
+        this.form_mahasiswa.name = "";
         this.loading.unset();
       }
     },
@@ -100,6 +101,8 @@ export default defineComponent({
       } catch (error) {
         alert(error);
       } finally {
+        this.form.name=''
+        this.form.desc=''
         this.loading.unset();
       }
     },

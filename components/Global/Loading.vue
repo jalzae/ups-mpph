@@ -16,7 +16,7 @@
 </template>
 <script lang="ts">
 import { useLoading } from "@/store/loading";
-import Vue, { defineComponent } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   setup() {
     const loading = useLoading();
