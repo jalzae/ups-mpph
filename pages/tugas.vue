@@ -72,6 +72,25 @@ export default defineComponent({
         inputElement.click();
       } else if (val.action == "download") {
         this.downloadTugas(val.val1);
+      } else if (val.action == "deletetugas") {
+        this.delTugas(val.val1);
+      }
+    },
+    async delTugas(id: string) {
+      try {
+        this.loading.set();
+        const route = useRoute();
+        const { id } = route.query;
+        const res = await this.sendRequest(
+          home.homedeletetugas({ id_tugas: id, id_mahasiswa: id })
+        );
+
+        if (!res.status) console.log(res.message);
+
+        await this.getTugas();
+      } catch (e) {
+      } finally {
+        this.loading.unset();
       }
     },
     downloadTugas(id: string) {
@@ -123,6 +142,15 @@ export default defineComponent({
               actionfalse: "",
               key: "id",
               key2: "id",
+            },
+          ];
+          this.format.action = [
+            {
+              action: "deletetugas",
+              class: "rounded-sm text-white p-2 shadow-md bg-red-500",
+              model: "id",
+              title: "",
+              icon: "fas fa-trash",
             },
           ];
         }
