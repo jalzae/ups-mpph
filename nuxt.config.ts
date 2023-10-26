@@ -5,12 +5,16 @@ require("dotenv").config();
 export default defineNuxtConfig({
   app: {
     head: {
-      title: "Treksistem - Solusi Suport Transportasi",
+      title: "UPS MPPH",
       link: [{ rel: "icon", type: "image/png", href: "/images/logo.png" }],
       meta: [
         {
           name: "description",
-          content: "Aplikasi untuk mendukung bisnis kurir anda.",
+          content: "Aplikasi untuk nyatet tugas saja",
+        },
+        {
+          name: "title",
+          content: "UPS MPPH",
         },
       ],
     },
