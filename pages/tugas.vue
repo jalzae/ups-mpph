@@ -20,10 +20,12 @@
     </div>
 
     <Tables :format="format" :datas="datas" @action="action" />
+    <Loading />
   </div>
 </template>
 <script lang="ts">
 import Tables from "@/components/Global/Tables.vue";
+import Loading from "@/components/Global/Loading.vue";
 import Vue, { defineComponent } from "vue";
 import { Format } from "~~/model/format";
 import Action from "~~/model/action";
@@ -39,7 +41,7 @@ export default defineComponent({
     };
   },
   mixins: [api],
-  components: { Tables },
+  components: { Tables, Loading },
   props: {},
   methods: {
     async action(val: Action) {

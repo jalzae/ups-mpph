@@ -8,11 +8,13 @@
       referrerpolicy="no-referrer"
     />
     <Tables :format="format" :datas="datas" @action="action" />
+    <Loading />
   </div>
 </template>
 <script lang="ts">
 import Vue, { defineComponent } from "vue";
 import Tables from "@/components/Global/Tables.vue";
+import Loading from "@/components/Global/Loading.vue";
 import { Format } from "~~/model/format";
 //store
 import * as store from "@/store/";
@@ -29,7 +31,7 @@ export default defineComponent({
     };
   },
   mixins: [api],
-  components: { Tables },
+  components: { Tables, Loading },
   props: {},
   methods: {
     action(val: Action) {

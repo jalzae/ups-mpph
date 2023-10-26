@@ -41,12 +41,14 @@
         @checkpin="checkpin"
       />
     </div>
+    <Loading />
   </div>
 </template>
 <script lang="ts">
 import Vue, { defineComponent } from "vue";
 import Forms from "@/components/Global/Form.vue";
 import Tables from "@/components/Global/Tables.vue";
+import Loading from "@/components/Global/Loading.vue";
 import { Format } from "~~/model/format";
 import Action from "~~/model/action";
 //store
@@ -64,7 +66,7 @@ export default defineComponent({
     };
   },
   mixins: [api],
-  components: { Tables, Forms },
+  components: { Tables, Forms, Loading },
   props: {},
   methods: {
     action(val: Action) {
