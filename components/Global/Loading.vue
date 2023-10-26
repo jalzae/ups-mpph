@@ -35,7 +35,9 @@ export default defineComponent({
       this.loading.set();
     },
   },
-  created() {},
+  created() {
+    this.loading.unset();
+  },
   data() {
     return {};
   },
