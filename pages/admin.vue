@@ -30,7 +30,7 @@
           :form="forms"
           :selected="form"
           :action="'addtugas'"
-          @addtugas="addtugas"
+          @addtugas="is_update_form ? ConfirmUpdateTugas() : addtugas()"
         />
         <Tables :format="format" :datas="datas" @action="action" />
       </div>
@@ -105,10 +105,17 @@ export default defineComponent({
         this.deltugas(val.val1);
       } else if (val.action == "delkelas") {
         this.delkelas(val.val1);
+      } else if (val.action == "updateTugas") {
+        this.updateTugas(val.val1);
       }
     },
     goto(url: string) {
       window.location.href = "/tugas?id=" + url + "&access=4226";
+    },
+    updateTugas(id: string) {
+      const item = this.datas.find((e: any) => e.id == id);
+      this.form = item;
+      this.is_update_form = true;
     },
     async delkelas(id: string) {
       try {
@@ -175,6 +182,20 @@ export default defineComponent({
       } finally {
         this.form.name = "";
         this.form.desc = "";
+        this.loading.unset();
+      }
+    },
+    async ConfirmUpdateTugas() {
+      try {
+        this.loading.set();
+        await this.sendRequest(tugas.tugasupdate(this.form.id, this.form));
+        this.fetchtugas();
+      } catch (error) {
+        alert(error);
+      } finally {
+        this.form.name = "";
+        this.form.desc = "";
+        this.is_update_form = false;
         this.loading.unset();
       }
     },
@@ -254,6 +275,7 @@ export default defineComponent({
   data() {
     return {
       is_admin: false,
+      is_update_form: false,
       activeTab: 0,
       tabs: ["Tugas", "Mahasiswa", "Kelas"],
       form: {
@@ -304,6 +326,13 @@ export default defineComponent({
             model: "id",
             title: "",
             icon: "fas fa-sign-in",
+          },
+          {
+            action: "updateTugas",
+            class: "btn-primary",
+            model: "id",
+            title: "",
+            icon: "fas fa-gear",
           },
           {
             action: "close",

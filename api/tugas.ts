@@ -4,6 +4,9 @@ export default {tugascreate(data:any){
       tugasreadall(){ 
         return {
           method:"GET",url:"Tugas/readall"}},
+      tugasupdate(id:any,data:any){ 
+        return {
+          method:"PUT",url:`Tugas/update/${id}`,data}},
       tugasdelete(id:any,){ 
         return {
           method:"DELETE",url:`Tugas/delete/${id}`}},
