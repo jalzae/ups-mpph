@@ -8,7 +8,23 @@
       referrerpolicy="no-referrer"
     />
     <div v-if="is_admin">
-      <div>
+      <div class="flex space-x-4">
+        <div
+          v-for="(tab, index) in tabs"
+          :key="index"
+          @click="activeTab = index"
+          :class="[
+            'px-4 py-2 cursor-pointer',
+            {
+              'bg-blue-500': activeTab === index,
+              'bg-gray-300': activeTab !== index,
+            },
+          ]"
+        >
+          {{ tab }}
+        </div>
+      </div>
+      <div v-if="activeTab == 0">
         <h2>Tugas</h2>
         <Forms
           :form="forms"
@@ -18,7 +34,7 @@
         />
         <Tables :format="format" :datas="datas" @action="action" />
       </div>
-      <div class="mt-8">
+      <div v-else-if="activeTab == 1">
         <h2>Mahasiswa</h2>
         <Forms
           :form="forms_mahasiswa"
@@ -31,6 +47,16 @@
           :datas="datas_mahasiswa"
           @action="action"
         />
+      </div>
+      <div v-else>
+        <h2>Kelas</h2>
+        <Forms
+          :form="forms_kelas"
+          :selected="form_kelas"
+          :action="'addkelas'"
+          @addkelas="addkelas"
+        />
+        <Tables :format="format_kelas" :datas="datas_kelas" @action="action" />
       </div>
     </div>
     <div v-else>
@@ -57,6 +83,7 @@ import * as store from "@/store/";
 import api from "@/api/index";
 import mhs from "@/api/mahasiswa";
 import tugas from "@/api/tugas";
+import kelas from "@/api/kelas";
 export default defineComponent({
   name: "",
   setup() {
@@ -76,11 +103,56 @@ export default defineComponent({
         this.delmhs(val.val1);
       } else if (val.action == "close") {
         this.deltugas(val.val1);
+      } else if (val.action == "delkelas") {
+        this.delkelas(val.val1);
       }
     },
     goto(url: string) {
       window.location.href = "/tugas?id=" + url + "&access=4226";
     },
+    async delkelas(id: string) {
+      try {
+        this.loading.set();
+        await this.sendRequest(kelas.kelasdelete(id));
+        this.fetchkelas();
+      } catch (error) {
+        alert(error);
+      } finally {
+        this.form_kelas.name = "";
+        this.loading.unset();
+      }
+    },
+    async fetchkelas() {
+      try {
+        this.loading.set();
+        const res = await this.sendRequest(kelas.kelasreadall());
+        if (!res.status) {
+          throw res.message;
+        }
+        this.datas_kelas = res.data.data;
+
+        this.forms[3].list = this.datas_kelas;
+        this.forms_mahasiswa[1].list = this.datas_kelas;
+      } catch (error) {
+        alert(error);
+        this.datas_kelas = [];
+      } finally {
+        this.loading.unset();
+      }
+    },
+    async addkelas() {
+      try {
+        this.loading.set();
+        await this.sendRequest(kelas.kelascreate(this.form_kelas));
+        this.fetchkelas();
+      } catch (error) {
+        alert(error);
+      } finally {
+        this.form_kelas.name = "";
+        this.loading.unset();
+      }
+    },
+
     async addmahasiswa() {
       try {
         this.loading.set();
@@ -114,7 +186,8 @@ export default defineComponent({
           throw res.message;
         }
         for (let x of res.data.data) {
-          x["status"] = x["status"] ? "Tertutup" : "Terbuka";
+          x.status = x.status ? "Tertutup" : "Terbuka";
+          x.name_kelas = x.Kelas.name ?? "Tidak ada Kelas";
         }
         this.datas = res.data.data;
       } catch (error) {
@@ -131,7 +204,11 @@ export default defineComponent({
         if (!res.status) {
           throw res.message;
         }
-        console.log(res.data);
+
+        for (let i of res.data.data) {
+          i.name_kelas = i.Kelas.name ?? "Tidak ada Kelas";
+        }
+
         this.datas_mahasiswa = res.data.data;
       } catch (error) {
         alert(error);
@@ -168,6 +245,7 @@ export default defineComponent({
 
         await this.fetchtugas();
         await this.fetchmahasiswa();
+        await this.fetchkelas();
       } else {
         alert("Ga usah coba2 masuk ya gembel");
       }
@@ -176,10 +254,13 @@ export default defineComponent({
   data() {
     return {
       is_admin: false,
+      activeTab: 0,
+      tabs: ["Tugas", "Mahasiswa", "Kelas"],
       form: {
         name: "",
         desc: "",
         dateline: "",
+        id_kelas: "",
       },
       forms: [
         {
@@ -197,6 +278,14 @@ export default defineComponent({
           label: "Dateline",
           model: "dateline",
         },
+        {
+          type: "select",
+          model: "id_kelas",
+          label: "Kelas",
+          value: "id",
+          display: "name",
+          list: [],
+        },
       ],
       datas: [
         {
@@ -206,8 +295,8 @@ export default defineComponent({
         },
       ],
       format: {
-        header: ["Nama Tugas", "Dateline", "Status", "Action"],
-        body: ["name", "dateline", "status"],
+        header: ["Nama Tugas", "Dateline", "Nama Kelas", "Status", "Action"],
+        body: ["name", "dateline", "name_kelas", "status"],
         action: [
           {
             action: "view",
@@ -227,12 +316,21 @@ export default defineComponent({
       } as Format,
       form_mahasiswa: {
         name: "",
+        id_kelas: "",
       },
       forms_mahasiswa: [
         {
           type: "text",
           model: "name",
           label: "Nama Mahasiswa",
+        },
+        {
+          type: "select",
+          model: "id_kelas",
+          label: "Kelas",
+          value: "id",
+          display: "name",
+          list: [],
         },
       ],
       form_pin: [
@@ -247,11 +345,33 @@ export default defineComponent({
       },
       datas_mahasiswa: [],
       format_mahasiswa: {
+        header: ["Nama", "Nama Kelas", "Action"],
+        body: ["name", "name_kelas"],
+        action: [
+          {
+            action: "delete",
+            class: "btn-danger",
+            model: "id",
+            title: "",
+            icon: "fas fa-trash",
+          },
+        ],
+      } as Format,
+      form_kelas: { name: "" },
+      forms_kelas: [
+        {
+          type: "text",
+          model: "name",
+          label: "Nama Mahasiswa",
+        },
+      ],
+      datas_kelas: [],
+      format_kelas: {
         header: ["Nama", "Action"],
         body: ["name"],
         action: [
           {
-            action: "delete",
+            action: "delkelas",
             class: "btn-danger",
             model: "id",
             title: "",
