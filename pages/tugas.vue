@@ -190,7 +190,7 @@ export default defineComponent({
           title: e,
           text: "Lain kali lebih rajin makanya, semangat !",
         });
-        alert(e);
+       
       } finally {
         this.loading.unset();
       }
