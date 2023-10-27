@@ -51,6 +51,7 @@ import api from "@/api/index";
 import home from "@/api/home";
 //store
 import * as store from "@/store/";
+import Swal from "sweetalert2";
 export default defineComponent({
   setup() {
     const loading = store.useLoading();
@@ -129,7 +130,7 @@ export default defineComponent({
         }
         if (access == "4226") {
           this.is_admin = true;
-          this.format.header.push('Action')
+          this.format.header.push("Action");
           this.format.btn2 = [
             {
               model: "status",
@@ -184,6 +185,11 @@ export default defineComponent({
         if (!res.status) throw res.message;
         await this.getTugas();
       } catch (e) {
+        Swal.fire({
+          icon: "error",
+          title: e,
+          text: "Lain kali lebih rajin makanya, semangat !",
+        });
         alert(e);
       } finally {
         this.loading.unset();
