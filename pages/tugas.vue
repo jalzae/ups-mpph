@@ -1,12 +1,8 @@
 <template>
   <div class="p-8">
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
     <h2>
       Daftar Serah Tugas :<strong>{{ selected.name }}</strong>
     </h2>
@@ -16,28 +12,17 @@
       </p>
     </h2>
     <div class="card my-8" v-html="selected.desc"></div>
-    <div class="mb-4">
-      <input
-        type="text"
-        class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2"
-        v-model="keyword"
-        placeholder="Search name .."
-      />
+    <div v-if="is_view">
+      <div class="mb-4">
+        <input type="text" class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2"
+          v-model="keyword" placeholder="Search name .." />
+      </div>
+      <Tables :format="format" :datas="keyword == '' ? datas : filtered" @action="action" />
     </div>
-    <Tables
-      :format="format"
-      :datas="keyword == '' ? datas : filtered"
-      @action="action"
-    />
     <Loading />
     <div style="display: none">
-      <input
-        type="file"
-        class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2"
-        id="urlId"
-        @change="previewFiles(['pdf', 'docx', 'doc'], $event)"
-        ref="uploadFile"
-      />
+      <input type="file" class="custom-input border border-gray-300 rounded outline-none p-2 w-full mt-2" id="urlId"
+        @change="previewFiles(['pdf', 'docx', 'doc'], $event)" ref="uploadFile" />
     </div>
   </div>
 </template>
@@ -49,6 +34,7 @@ import { Format } from "~~/model/format";
 import Action from "~~/model/action";
 import api from "@/api/index";
 import home from "@/api/home";
+import mahasiswatugas from "@/api/mahasiswatugas";
 //store
 import * as store from "@/store/";
 import Swal from "sweetalert2";
@@ -76,6 +62,53 @@ export default defineComponent({
         this.downloadTugas(val.val1);
       } else if (val.action == "deletetugas") {
         this.delTugas(val.val1);
+      } else if (val.action == "nilai") {
+
+        //cek dulu sudah ada nilai belum
+        const mhs = this.datas.find((e: any) => e.id == val.val1);
+        if (!mhs.MahasiswaTugas || mhs.MahasiswaTugas.length == 0) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Mahasiswa belum input tugas'
+          })
+          return
+        }
+
+        const { value: text } = await Swal.fire({
+          input: 'textarea',
+          inputLabel: 'Message',
+          inputPlaceholder: 'Type your message here...',
+          inputAttributes: {
+            'aria-label': 'Type your message here'
+          },
+          showCancelButton: true
+        })
+
+        if (text) {
+          this.updateNilai(mhs.MahasiswaTugas.id, text)
+        }
+      } else if (val.action == "lihatnilai") {
+        Swal.fire({
+          icon: 'info',
+          title: 'Mau lihat apalu?',
+          text: 'Lihat penilaian transfer dulu bos 🙏'
+        })
+      }
+    },
+    async updateNilai(idmhstugas: string, penilaian: string) {
+      try {
+        this.loading.set();
+        const res = await this.sendRequest(
+          mahasiswatugas.mahasiswatugasupdate(idmhstugas, { penilaian })
+        );
+
+        if (!res.status) console.log(res.message);
+
+        await this.getTugas();
+      } catch (e) {
+      } finally {
+        this.loading.unset();
       }
     },
     async delTugas(idmhs: string) {
@@ -124,38 +157,51 @@ export default defineComponent({
         for (let i of this.datas) {
           if (i.MahasiswaTugas.length != 0) {
             i.status = "true";
+            i.penilaian = i.MahasiswaTugas.penilaian
           } else {
             i.status = "false";
           }
         }
         if (access == "4226") {
           this.is_admin = true;
-          this.format.header.push("Action");
-          this.format.btn2 = [
-            {
-              model: "status",
-              false: "false",
-              title: "Enable",
-              icon: "fas fa-download text-white",
-              class: "rounded-sm text-white p-2 shadow-md bg-green-500",
-              action: "download",
-              titlefalse: "",
-              iconfalse: "fas fa-close text-white",
-              classfalse: "rounded-sm text-white p-2 shadow-md bg-red-500",
-              actionfalse: "",
-              key: "id",
-              key2: "id",
-            },
-          ];
-          this.format.action = [
-            {
-              action: "deletetugas",
-              class: "rounded-sm text-white p-2 shadow-md bg-red-500",
-              model: "id",
-              title: "",
-              icon: "fas fa-trash",
-            },
-          ];
+          this.format = {
+            header: ["Nama Mahasiswa", "Penilaian", "Status", "Action"],
+            body: ["name", "penilaian"],
+            btn2: [
+              {
+                model: "status",
+                false: "false",
+                title: "Enable",
+                icon: "fas fa-download text-white",
+                class: "rounded-sm text-white p-2 shadow-md bg-green-500",
+                action: "download",
+                titlefalse: "",
+                iconfalse: "fas fa-close text-white",
+                classfalse: "rounded-sm text-white p-2 shadow-md bg-red-500",
+                actionfalse: "",
+                key: "id",
+                key2: "id",
+              },
+            ],
+            action: [
+              {
+                action: "nilai",
+                class: "rounded-sm text-white p-2 shadow-md bg-blue-500",
+                model: "id",
+                title: "",
+                icon: "fas fa-pencil",
+              },
+              {
+                action: "deletetugas",
+                class: "rounded-sm text-white p-2 shadow-md bg-red-500",
+                model: "id",
+                title: "",
+                icon: "fas fa-trash",
+              },
+            ]
+          }
+
+
         }
       } catch (e) {
         alert(e);
@@ -190,7 +236,7 @@ export default defineComponent({
           title: e,
           text: "Lain kali lebih rajin makanya, semangat !",
         });
-       
+
       } finally {
         this.loading.unset();
       }
@@ -213,6 +259,7 @@ export default defineComponent({
     return {
       keyword: "",
       id_mhs: null,
+      is_view: true,
       is_admin: false,
       selected: {
         name: "",
@@ -234,7 +281,7 @@ export default defineComponent({
             title: "Enable",
             icon: "fas fa-check text-white",
             class: "rounded-sm text-white p-2 shadow-md bg-green-500",
-            action: "",
+            action: "lihatnilai",
             titlefalse: "",
             iconfalse: "fas fa-upload text-white",
             classfalse: "rounded-sm text-white p-2 shadow-md bg-red-500",
@@ -247,7 +294,7 @@ export default defineComponent({
       } as Format,
     };
   },
-  mounted() {},
+  mounted() { },
   async created() {
     await this.getTugas();
   },

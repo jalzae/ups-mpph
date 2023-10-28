@@ -16,7 +16,7 @@
           :class="[
             'px-4 py-2 cursor-pointer',
             {
-              'bg-blue-500': activeTab === index,
+              'bg-blue-500 text-white': activeTab === index,
               'bg-gray-300': activeTab !== index,
             },
           ]"
