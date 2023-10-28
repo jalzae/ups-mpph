@@ -25,6 +25,12 @@
           <td class="py-4 px-6 border-b border-gray-200" v-for="(items, i) in format.body" :key="i">
             {{ item[items] }}
           </td>
+          <td class="py-4 px-6 border-b border-gray-200" v-for="(items) in format.bodyCus" :key="items.model">
+            <div v-if="items.type == 'html'" v-html="item[items.model]"></div>
+            <div v-else-if="items.type == 'img'">
+              <img :src="this.$axios.defaults.baseURL + item[items.model]" :class="items.class" />
+            </div>
+          </td>
           <td class="py-4 px-6 border-b border-gray-200" v-for="items in format.btn" :key="items.action">
             <button v-if="item[items.model] == items.false" style="margin: 10px !important" :class="items.class"
               @click="action(items.action, item[items.key], null)" class="btn">

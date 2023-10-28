@@ -166,7 +166,11 @@ export default defineComponent({
           this.is_admin = true;
           this.format = {
             header: ["Nama Mahasiswa", "Penilaian", "Status", "Action"],
-            body: ["name", "penilaian"],
+            body: ["name",],
+            bodyCus: [{
+              type: 'html',
+              model: "penilaian",
+            }],
             btn2: [
               {
                 model: "status",
