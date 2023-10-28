@@ -3,7 +3,7 @@
     <div class="textLoader">
       <div class="text-center items-center">
         <img
-          :src="`/logo.png`"
+          :src="`/logo.jpg`"
           alt="navbar brand"
           class="navbar-brand"
           style="min-height: 100%"
