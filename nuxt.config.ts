@@ -5,7 +5,7 @@ require("dotenv").config();
 export default defineNuxtConfig({
   app: {
     head: {
-      title: "UPS MPPH",
+      title: "Pengumpulan Tugas Prof. Hamidah.",
       link: [{ rel: "icon", type: "image/png", href: "/images/logo.png" }],
       meta: [
         {
@@ -14,7 +14,7 @@ export default defineNuxtConfig({
         },
         {
           name: "title",
-          content: "UPS MPPH",
+          content: "Pengumpulan Tugas Prof. Hamidah",
         },
       ],
     },
