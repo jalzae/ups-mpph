@@ -26,6 +26,7 @@
     "@ckeditor/ckeditor5-vue": "^5.1.0",
     "@jalzae/ckeditor5build": "^1.0.5",
     "@pinia/nuxt": "^0.4.11",
+    "@progress/kendo-vue-excel-export": "^4.0.0",
     "base64url": "^3.0.1",
     "buffer": "^6.0.3",
     "crypto": "^1.0.1",

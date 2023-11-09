@@ -18,6 +18,10 @@
           v-model="keyword" placeholder="Search name .." />
       </div>
       <Tables :format="format" :datas="keyword == '' ? datas : filtered" @action="action" />
+      <div v-if="is_admin">
+        <buttonUtils :action="'downloadExcel'" @downloadExcel="downloadExcel" :background="'bg-blue-500'"
+          :title="'Export'" @action="action" />
+      </div>
     </div>
     <Loading />
     <div style="display: none">
@@ -29,6 +33,7 @@
 <script lang="ts">
 import Tables from "@/components/Global/Tables.vue";
 import Loading from "@/components/Global/Loading.vue";
+import buttonUtils from "~~/components/Global/buttonUtils.vue";
 import Vue, { defineComponent } from "vue";
 import { Format } from "~~/model/format";
 import Action from "~~/model/action";
@@ -38,6 +43,7 @@ import mahasiswatugas from "@/api/mahasiswatugas";
 //store
 import * as store from "@/store/";
 import Swal from "sweetalert2";
+import { saveExcel } from '@progress/kendo-vue-excel-export';
 export default defineComponent({
   setup() {
     const loading = store.useLoading();
@@ -48,7 +54,7 @@ export default defineComponent({
     };
   },
   mixins: [api],
-  components: { Tables, Loading },
+  components: { Tables, Loading, buttonUtils },
   props: {},
   methods: {
     async action(val: Action) {
@@ -94,6 +100,25 @@ export default defineComponent({
           title: 'Mau lihat apalu?',
           text: 'Lihat penilaian transfer dulu bos 🙏'
         })
+      }
+    },
+    downloadExcel() {
+      try {
+
+        const column = [
+          { field: 'name', title: 'Nama Mahasiswa' },
+          { field: 'penilaian', title: 'Penilaian' },
+        ]
+
+        saveExcel({
+          data: this.datas,
+          fileName: 'exportFile',
+          columns: column,
+        })
+
+      } catch (e) {
+        alert(e)
+      } finally {
       }
     },
     async updateNilai(idmhstugas: string, penilaian: string) {
